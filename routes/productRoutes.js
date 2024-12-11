@@ -70,4 +70,16 @@ router.delete("/:id", verifyToken, verifyRole(["manager"]), (req, res) => {
     });
 });
 
+router.get('/analytics/quantities', (req, res) => {
+    const query = `
+        SELECT product_name, quantity 
+        FROM products
+    `;
+    global.db.query(query, (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(results);
+    });
+});
+
+
 module.exports = router;

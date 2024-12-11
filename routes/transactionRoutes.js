@@ -109,47 +109,26 @@ router.get('/:id', (req, res) => {
     });
 });
 
-// Add a new transaction and update product quantity
+// Add a new transaction
 router.post('/', (req, res) => {
     const { product_id, user_id, change_type, quantity, notes } = req.body;
 
-    // Start a database transaction to ensure consistency
-    global.db.beginTransaction((err) => {
-        if (err) return res.status(500).json({ error: err.message });
+    if (!product_id || !user_id || !change_type || !quantity) {
+        return res.status(400).json({ error: 'All fields are required' });
+    }
 
-        // Insert the transaction into the transactions table
-        const transactionQuery = 'INSERT INTO transactions (product_id, user_id, change_type, quantity, notes) VALUES (?, ?, ?, ?, ?)';
-        global.db.query(transactionQuery, [product_id, user_id, change_type, quantity, notes], (err, results) => {
-            if (err) {
-                return global.db.rollback(() => {
-                    res.status(500).json({ error: err.message });
-                });
-            }
+    // Insert transaction data into the transactions table
+    const insertQuery = `
+        INSERT INTO transactions (product_id, user_id, change_type, quantity, notes)
+        VALUES (?, ?, ?, ?, ?)
+    `;
 
-            // Update the product quantity in the products table
-            const updateQuery = `
-                UPDATE products 
-                SET quantity = quantity ${change_type === 'add' ? '+' : '-'} ?
-                WHERE product_id = ?
-            `;
-            global.db.query(updateQuery, [quantity, product_id], (err, results) => {
-                if (err) {
-                    return global.db.rollback(() => {
-                        res.status(500).json({ error: err.message });
-                    });
-                }
-
-                // Commit the transaction
-                global.db.commit((err) => {
-                    if (err) {
-                        return global.db.rollback(() => {
-                            res.status(500).json({ error: err.message });
-                        });
-                    }
-                    res.status(201).json({ message: 'Transaction recorded and product quantity updated successfully' });
-                });
-            });
-        });
+    global.db.query(insertQuery, [product_id, user_id, change_type, quantity, notes], (err, results) => {
+        if (err) {
+            console.error('Error inserting transaction:', err.message);
+            return res.status(500).json({ error: 'Failed to record transaction.' });
+        }
+        res.status(201).json({ message: 'Transaction recorded successfully.', transactionId: results.insertId });
     });
 });
 
