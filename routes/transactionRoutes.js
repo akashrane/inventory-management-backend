@@ -141,4 +141,16 @@ router.delete('/:id', (req, res) => {
     });
 });
 
+router.get('/api/transactions', authenticateToken, async (req, res) => {
+    try {
+        const query = 'SELECT * FROM transactions';
+        
+        const result = await db.query(query);
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching transactions:', error);
+        res.status(500).json({ message: 'Error fetching transactions' });
+    }
+});
+
 module.exports = router;
