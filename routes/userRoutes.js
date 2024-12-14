@@ -37,3 +37,39 @@ router.post('/login', (req, res) => {
 });
 
 module.exports = router;
+
+
+
+router.get('/counts', (req, res) => {
+    const queries = [
+        'SELECT count(*) AS total_products FROM Products',
+        'SELECT SUM(quantity) AS total_quantity FROM Products',
+        'SELECT count(*) AS total_suppliers FROM Suppliers'
+    ];
+
+    const results = {};
+
+    let completedQueries = 0;
+
+    queries.forEach((query, index) => {
+        global.db.query(query, (err, queryResults) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+
+            // Add the result of the query to the results object
+            if (index === 0) results.total_products = queryResults[0].total_products;
+            if (index === 1) results.total_quantity = queryResults[0].total_quantity;
+            if (index === 2) results.total_suppliers = queryResults[0].total_suppliers;
+
+            completedQueries++;
+
+            // Send the response when all queries are completed
+            if (completedQueries === queries.length) {
+                res.json(results);
+            }
+        });
+    });
+});
+
+module.exports = router;
