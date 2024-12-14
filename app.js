@@ -11,7 +11,6 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const authRoutes = require('./routes/authRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes'); 
 
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 

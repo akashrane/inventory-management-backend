@@ -141,7 +141,7 @@ router.delete('/:id', (req, res) => {
     });
 });
 
-router.get('/api/transactions', authenticateToken, async (req, res) => {
+router.get('/api/transactions', async (req, res) => {
     try {
         const query = 'SELECT * FROM transactions';
         
@@ -152,5 +152,11 @@ router.get('/api/transactions', authenticateToken, async (req, res) => {
         res.status(500).json({ message: 'Error fetching transactions' });
     }
 });
+
+router.get('/test/abc', (req, res) => {
+    res.send('Analytics route is working');
+});
+
+
 
 module.exports = router;
